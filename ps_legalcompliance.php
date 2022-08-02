@@ -726,7 +726,7 @@ class Ps_LegalCompliance extends Module
                 $footer_doc->loadHTML('<!DOCTYPE html>
                     <html lang="' . (new Language($id_lang))->iso_code .'">
                         <head><meta charset="utf-8"></head><body>' .
-                    $this->display(__FILE__, 'hook-email-wrapper_classic.tpl') . '</body></html>');                
+                    $this->display(__FILE__, 'hook-email-wrapper_classic.tpl') . '</body></html>');
                 $wrapper->appendChild($footer_doc);
 
             } else {
@@ -737,14 +737,14 @@ class Ps_LegalCompliance extends Module
                     if ($div_class_attribute == 'shadow wrapper-container') {
                         $wrapper = $divs->item($k);
                     }
-                
+
                     $k++;
                 }
 
                 $footer_doc->loadHTML('<!DOCTYPE html>
                     <html lang="' . (new Language($id_lang))->iso_code .'">
                         <head><meta charset="utf-8"></head><body>' .
-                    $this->display(__FILE__, 'hook-email-wrapper.tpl') . '</body></html>');                
+                    $this->display(__FILE__, 'hook-email-wrapper.tpl') . '</body></html>');
                 for ($index = 0; $index < $footer_doc->getElementsByTagName('div')->length; $index++) {
                     $clone_node = $doc->importNode(
                         $footer_doc->getElementsByTagName('div')->item($index)->cloneNode(true),
@@ -757,8 +757,8 @@ class Ps_LegalCompliance extends Module
                     $td->appendChild($clone_node);
                 }
             }
-            
-            
+
+
             $param['template_html'] = $doc->saveHTML();
         } catch (Exception $e) {
             $param['template_html'] .= $this->display(__FILE__, 'hook-email-wrapper.tpl');
@@ -1063,7 +1063,7 @@ class Ps_LegalCompliance extends Module
             $cms_page_shipping_and_payment = $cms_role_repository->findOneByName(self::LEGAL_SHIP_PAY);
             $link = $this->context->link->getCMSLink((int) $cms_page_shipping_and_payment->id_cms);
 
-            $this->context->smarty->assign(array('link' => $link));
+            $this->context->smarty->assign(array('cms_link' => $link));
             return $this->display(__FILE__, 'hookDisplayCartPriceBlock_shipping_details.tpl');
         }
     }

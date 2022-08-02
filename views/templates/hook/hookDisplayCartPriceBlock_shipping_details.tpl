@@ -23,6 +23,6 @@
  *  International Registered Trademark & Property of PrestaShop SA
  *}
 
- <a href="{$link}" target="_blank">
+ <a href="{$cms_link}" target="_blank">
     {l s='(Under conditions)' d='Modules.Legalcompliance.Shop'}
  </a>
