@@ -804,7 +804,7 @@ class Ps_LegalCompliance extends Module
     {
         $printable_cms_pages = array();
         $cms_role_repository = $this->entity_manager->getRepository('CMSRole');
-        foreach (array(self::LEGAL_CONDITIONS, self::LEGAL_REVOCATION, self::LEGAL_SHIP_PAY, self::LEGAL_PRIVACY) as $cms_page_name) {
+        foreach (array(self::LEGAL_CONDITIONS, self::LEGAL_REVOCATION, self::LEGAL_REVOCATION_FORM, self::LEGAL_SHIP_PAY, self::LEGAL_PRIVACY) as $cms_page_name) {
             $cms_page_associated = $cms_role_repository->findOneByName($cms_page_name);
             if ($cms_page_associated instanceof CMSRole && (int) $cms_page_associated->id_cms > 0) {
                 $printable_cms_pages[] = (int) $cms_page_associated->id_cms;
