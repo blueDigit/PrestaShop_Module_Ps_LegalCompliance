@@ -2,49 +2,14 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
   <file original="admin-dev" source-language="de-DE" target-language="de-DE" datatype="plaintext">
     <body>
-      <trans-unit id="94c54865aaec96e3a4e6a2d6f7331c8a">
-        <source>You can add additional legal informations and links to other legal ressources into this text editor.</source>
-        <target>You can add additional legal informations and links to other legal ressources into this text editor.</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="a2410748e3bc571307a8a8fcc3aa121b">
-        <source>Additional HTML in Mail-Templates</source>
-        <target>Additional HTML in Mail-Templates</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="f7c6db776fa123bd10235f0ddb365230">
-        <source>Legal Mail Footer</source>
-        <target>Legal Mail Footer</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="eb64e5149bb0ff0af3655aa8ba8d38f0">
-        <source>Displays the tax informations in the footer.</source>
-        <target>Displays the tax informations in the footer.</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="1603225cfa44756ab586b211e0fd8a71">
-        <source>Display tax in footer</source>
-        <target>Display tax in footer</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="472b0d002b98940cdd7a36062ef1d457">
-        <source> 'Our previous price' label</source>
-        <target> 'Our previous price' label</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="fb7371d3a9751d20d1e07fe514a5c4ec">
-        <source>Keep on growing your business serenely, sell all over Europe while complying with the applicable e-commerce laws.</source>
-        <target>Keep on growing your business serenely, sell all over Europe while complying with the applicable e-commerce laws.</target>
-        <note>Line: </note>
-      </trans-unit>
       <trans-unit id="de2cd9f1dfad85516edd95679af377fd">
         <source>Legal Compliance</source>
         <target>Rechtssicherheit</target>
         <note>Line: </note>
       </trans-unit>
-      <trans-unit id="bb8956c67b82c7444a80c6b2433dd8b4">
-        <source>Are you sure you want to uninstall this module?</source>
-        <target>Soll dieses Modul wirklich deinstalliert werden?</target>
+      <trans-unit id="3abc778d1eb09576ba6b26848520bbdd">
+        <source>This module helps merchants comply with applicable e-commerce laws.</source>
+        <target>Dieses Modul hilft Händlern, die geltenden E-Commerce-Gesetze einzuhalten.</target>
         <note>Line: </note>
       </trans-unit>
       <trans-unit id="3b528a3fe35bcd29ad2ab0e77fe01d4d">
@@ -155,6 +120,11 @@
       <trans-unit id="d01f8eb7dc644036a1ead2b82aaed055">
         <source>Indicate for which countries your delivery time applies.</source>
         <target>Zeigt an, für welche Länder Ihre Lieferzeit gilt.</target>
+        <note>Line: </note>
+      </trans-unit>
+      <trans-unit id="472b0d002b98940cdd7a36062ef1d457">
+        <source> 'Our previous price' label</source>
+        <target> 'Our previous price' label</target>
         <note>Line: </note>
       </trans-unit>
       <trans-unit id="cf4e7929f6a8cafcba348d0889f7a452">
@@ -297,6 +267,11 @@
         <target>-- Zugehörige Seite wählen --</target>
         <note>Line: </note>
       </trans-unit>
+      <trans-unit id="bb8956c67b82c7444a80c6b2433dd8b4">
+        <source>Are you sure you want to uninstall this module?</source>
+        <target>Soll dieses Modul wirklich deinstalliert werden?</target>
+        <note>Line: </note>
+      </trans-unit>
       <trans-unit id="c49b8914d58716ebb70e35e5a08db6dd">
         <source>Email content inclusion</source>
         <target>Zusätzliche E-Mail-Inhalte</target>
@@ -310,11 +285,6 @@
       <trans-unit id="96103eb82bd7f00ef55fac85c2f0a410">
         <source>For each type of email, you can define which content you would like to include.</source>
         <target>Sie können für jede Shop-Mail separat festlegen, welche zusätzlichen Informationen übermittelt werden sollen.</target>
-        <note>Line: </note>
-      </trans-unit>
-      <trans-unit id="f68e93b7698c42081e06d5b2925bd543">
-        <source>Check for new email templates</source>
-        <target>Test Email</target>
         <note>Line: </note>
       </trans-unit>
       <trans-unit id="e29252902fd4eaee6279ea5b60bc9092">
