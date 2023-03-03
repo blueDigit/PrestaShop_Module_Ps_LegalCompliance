@@ -1,2 +1,7 @@
 /vendor
+/translations/*.php
 config_*.xml
+.php_cs.cache
+.idea
+.vscode
+.directory
