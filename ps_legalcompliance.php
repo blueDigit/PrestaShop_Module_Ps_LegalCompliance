@@ -49,6 +49,8 @@ class Ps_LegalCompliance extends Module
     protected $_errors = array();
     protected $_warnings = array();
 
+    private $mailInfo = [];
+
     /* Constants used for LEGAL/CMS Management */
     const LEGAL_NO_ASSOC = 'NO_ASSOC';
     const LEGAL_NOTICE = 'LEGAL_NOTICE';
@@ -667,123 +669,110 @@ class Ps_LegalCompliance extends Module
 
     public function hookActionEmailAddAfterContent($param)
     {
-        if (!isset($param['template']) || !isset($param['template_html']) || !isset($param['template_txt'])) {
+        if (
+            !isset($param['template'])
+            || !isset($param['template_html'])
+            || !isset($param['template_txt'])
+        ) {
             return;
         }
 
-        $tpl_name = (string) $param['template'];
-        $tpl_name_exploded = explode('.', $tpl_name);
-        if (is_array($tpl_name_exploded)) {
-            $tpl_name = (string) $tpl_name_exploded[0];
-        }
+        $mailInfo = $this->getMailInfo($param['template']);
 
-        $id_lang = (int) $param['id_lang'];
-        $mail_id = AeucEmailEntity::getMailIdFromTplFilename($tpl_name);
-        if (!isset($mail_id['id_mail'])) {
-            return;
-        }
-
-        $mail_id = (int) $mail_id['id_mail'];
-        $cms_role_ids = AeucCMSRoleEmailEntity::getCMSRoleIdsFromIdMail($mail_id);
-
-        $tmp_cms_role_list = array();
-        foreach ($cms_role_ids as $cms_role_id) {
-            $tmp_cms_role_list[] = $cms_role_id['id_cms_role'];
-        }
-
-        $cms_role_repository = $this->entity_manager->getRepository('CMSRole');
-        $cms_roles = $tmp_cms_role_list
-            ? $cms_role_repository->findByIdCmsRole($tmp_cms_role_list)
-            : array();
-
-        $cms_repo = $this->entity_manager->getRepository('CMS');
-        $cms_contents = array();
-
-        foreach ($cms_roles as $cms_role) {
-            $cms_page = $cms_repo->i10nFindOneById((int) $cms_role->id_cms, $id_lang, $this->context->shop->id);
-
-            if (!isset($cms_page->content)) {
-                continue;
+        if ($mailInfo['mail_id']) {
+            if (!preg_match(
+                '/\{ps_legalcompliance_content_html\}/',
+                $param['template_html']
+            )) {
+                $param['template_html'] .= '{ps_legalcompliance_content_html}';
             }
-
-            $cms_contents[] = $cms_page->content;
-            $param['template_txt'] .= strip_tags($cms_page->content, true);
-        }
-
-        $this->context->smarty->assign(array(
-            'cms_contents' => $cms_contents,
-            'legal_mail_footer' => Configuration::get('LEGAL_MAIL_FOOTER', $id_lang)
-        ));
-        $str = $param['template_html'];
-
-        try {
-            $doc = new DOMDocument();
-            $doc->loadHTML($str);
-            $footer_doc = new DOMDocument();
-
-            if (Configuration::get('PS_MAIL_THEME') == 'classic') {
-                $wrapper = $doc->getElementsByTagName('table')->item(0); //selects tbody
-                $footer_doc->loadHTML('<!DOCTYPE html>
-                    <html lang="' . (new Language($id_lang))->iso_code .'">
-                        <head><meta charset="utf-8"></head><body>' .
-                    $this->display(__FILE__, 'hook-email-wrapper_classic.tpl') . '</body></html>');
-                $wrapper->appendChild($footer_doc);
-
-            } else {
-                $divs = $doc->getElementsByTagName('div'); //selects first wrapping div
-                $k = 0;
-                foreach ($divs as $div) {
-                    $div_class_attribute = $divs->item($k)->getAttribute('class');
-                    if ($div_class_attribute == 'shadow wrapper-container') {
-                        $wrapper = $divs->item($k);
-                    }
-
-                    $k++;
-                }
-
-                $footer_doc->loadHTML('<!DOCTYPE html>
-                    <html lang="' . (new Language($id_lang))->iso_code .'">
-                        <head><meta charset="utf-8"></head><body>' .
-                    $this->display(__FILE__, 'hook-email-wrapper.tpl') . '</body></html>');
-                for ($index = 0; $index < $footer_doc->getElementsByTagName('div')->length; $index++) {
-                    $clone_node = $doc->importNode(
-                        $footer_doc->getElementsByTagName('div')->item($index)->cloneNode(true),
-                        true
-                    );
-                    $tr = $doc->createElement("tr");
-                    $td = $doc->createElement("td");
-                    $tr->appendChild($td);
-                    $wrapper->appendChild($tr);
-                    $td->appendChild($clone_node);
-                }
+            if (!preg_match(
+                '/\{ps_legalcompliance_content_txt\}/',
+                $param['template_txt']
+            )) {
+                $param['template_txt'] .= '{ps_legalcompliance_content_txt}';
             }
-
-
-            $param['template_html'] = $doc->saveHTML();
-        } catch (Exception $e) {
-            $param['template_html'] .= $this->display(__FILE__, 'hook-email-wrapper.tpl');
+        } else {
+            $param['template_html'] = preg_replace(
+                '/\{ps_legalcompliance_content_html\}/',
+                '',
+                $param['template_html']
+            );
+            $param['template_txt'] = preg_replace(
+                '/\{ps_legalcompliance_content_txt\}/',
+                '',
+                $param['template_txt']
+            );
         }
     }
 
     public function hookSendMailAlterTemplateVars($param)
     {
-        if (!isset($param['template']) && !isset($param['{carrier}'])) {
+        if (
+            !isset($param['template'])
+            || !isset($param['template_vars'])
+            || !isset($param['cart'])
+        ) {
             return;
         }
 
-        $tpl_name = (string) $param['template'];
-        $tpl_name_exploded = explode('.', $tpl_name);
-        if (is_array($tpl_name_exploded)) {
-            $tpl_name = (string) $tpl_name_exploded[0];
+        $mailInfo = $this->getMailInfo($param['template']);
+
+        $langId = (int) $param['cart']->id_lang;
+
+        if ($mailInfo['mail_id']) {
+            $cmsRoleIds = AeucCMSRoleEmailEntity::getCMSRoleIdsFromIdMail(
+                $mailInfo['mail_id']
+            );
+
+            $tmpCmsRoleList = [];
+            foreach ($cmsRoleIds as $cmsRoleId) {
+                $tmpCmsRoleList[] = $cmsRoleId['id_cms_role'];
+            }
+
+            $cmsRoleRepository = $this->entity_manager->getRepository('CMSRole');
+            $cmsRoles = $tmpCmsRoleList
+                ? $cmsRoleRepository->findByIdCmsRole($tmpCmsRoleList)
+                : [];
+
+            $cmsRepo = $this->entity_manager->getRepository('CMS');
+
+            $cmsContents = [];
+            $cmsContentsTxt = '';
+
+            foreach ($cmsRoles as $cmsRole) {
+                $cmsPage = $cmsRepo->i10nFindOneById(
+                    (int) $cmsRole->id_cms,
+                    $langId,
+                    $this->context->shop->id
+                );
+
+                if (!isset($cmsPage->content)) {
+                    continue;
+                }
+
+                $cmsContents[] = $cmsPage->content;
+                $cmsContentsTxt .= strip_tags($cmsPage->content, true);
+            }
+
+            $this->context->smarty->assign([
+                'cms_contents' => $cmsContents,
+                'legal_mail_footer' => Configuration::get('LEGAL_MAIL_FOOTER', $langId),
+            ]);
+
+            $cmsContents = $this->display(__FILE__, 'hook-email-wrapper.tpl');
+
+            $param['template_vars']['{ps_legalcompliance_content_html}'] = $cmsContents;
+            $param['template_vars']['{ps_legalcompliance_content_txt}'] = $cmsContentsTxt;
         }
 
-        if ('order_conf' !== $tpl_name) {
-            return;
+        if (
+            'order_conf' === $mailInfo['tpl_name']
+            && isset($param['template_vars']['{carrier}'])
+        ) {
+            $carrier = new Carrier((int) $param['cart']->id_carrier, $langId);
+            $param['template_vars']['{carrier}'] .= ' - '.$carrier->delay;
         }
-
-        $carrier = new Carrier((int) $param['cart']->id_carrier);
-
-        $param['template_vars']['{carrier}'] .= ' - '.$carrier->delay[(int) $param['cart']->id_lang];
     }
 
     public function hookHeader($param)
@@ -798,6 +787,23 @@ class Ps_LegalCompliance extends Module
         if (Tools::getValue('direct_print') == '1') {
             $this->context->controller->registerJavascript('modules-fo_aeuc_print', 'modules/'.$this->name.'/views/js/fo_aeuc_print.js', ['position' => 'bottom', 'priority' => 150]);
         }
+    }
+
+    protected function getMailInfo(string $template): array
+    {
+        if (!isset($this->mailInfo[$template])) {
+            $tplName = explode('.', $template)[0];
+
+            $mailIdArr = AeucEmailEntity::getMailIdFromTplFilename($tplName);
+            $mailId = isset($mailIdArr['id_mail']) ? (int) $mailIdArr['id_mail'] : null;
+
+            $this->mailInfo[$template] = [
+                'tpl_name' => $tplName,
+                'mail_id' => $mailId,
+            ];
+        }
+
+        return $this->mailInfo[$template];
     }
 
     protected function isPrintableCMSPage()
