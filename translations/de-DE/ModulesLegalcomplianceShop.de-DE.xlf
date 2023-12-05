@@ -27,9 +27,9 @@
         <target>Bitte erst die Widerrufsbedingungen von virtuellen Artikeln bestätigen!</target>
         <note>Line: </note>
       </trans-unit>
-      <trans-unit id="60657eaf863277872e2c9a2d31423842">
-        <source>I agree to the [terms of service] and [revocation terms] and will adhere to them unconditionally.</source>
-        <target>Ich stimme den [terms of service] und [revocation terms] zu und werde mich bedingungslos daran halten.</target>
+      <trans-unit id="cd18220ba24e07df2d859c30cb5809a9">
+        <source>I agree to the [terms of service], [revocation terms] and [privacy terms] and will adhere to them unconditionally.</source>
+        <target>Ich habe die [Allgemeinen Geschäftsbedingungen], mein [Widerrufsrecht] und die [Datenschutzerklärung] gelesen und erkläre mit dem Absenden der Bestellung mein Einverständnis.</target>
         <note>Line: </note>
       </trans-unit>
       <trans-unit id="6f06a13b9608ee5f2da343a3ca049f31">
