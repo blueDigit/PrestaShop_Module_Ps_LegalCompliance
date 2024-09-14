@@ -33,6 +33,7 @@ use PrestaShop\PrestaShop\Core\Foundation\Filesystem\FileSystem;
 use PrestaShop\PrestaShop\Core\Email\EmailLister;
 use PrestaShop\PrestaShop\Core\Checkout\TermsAndConditions;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
+use PrestaShop\PrestaShop\Core\MailTemplate\Layout\LayoutInterface as MailLayoutInterface;
 
 /* Include required entities */
 include_once __DIR__.'/entities/AeucCMSRoleEmailEntity.php';
@@ -113,6 +114,7 @@ class Ps_LegalCompliance extends Module
             $this->registerHook('displayOverrideTemplate') &&
             $this->registerHook('displayCheckoutSummaryTop') &&
             $this->registerHook('sendMailAlterTemplateVars') &&
+            $this->registerHook('actionBuildMailPreviewTemplateVariables') &&
             $this->registerHook('displayReassurance') &&
             $this->createConfig() &&
             $this->generateAndLinkCMSPages() &&
@@ -716,9 +718,51 @@ class Ps_LegalCompliance extends Module
             return;
         }
 
-        $mailInfo = $this->getMailInfo($param['template']);
+        $this->addMailTemplateVariables(
+            $param['template_vars'],
+            $param['template'],
+            $param['cart']->id_lang,
+            $param['cart']->id_carrier
+        );
+    }
 
-        $langId = (int) $param['cart']->id_lang;
+    public function hookActionBuildMailPreviewTemplateVariables($param)
+    {
+        if (
+            !isset($param['mail_layout'])
+            || !isset($param['template_vars'])
+        ) {
+            return;
+        }
+
+        $orders = Order::getOrdersWithInformations(1);
+        $order = new Order($orders[0]['id_order']);
+
+        $this->addMailTemplateVariables(
+            $param['template_vars'],
+            $param['mail_layout']->getName(),
+            $this->context->language->id,
+            $order->id_carrier
+        );
+    }
+
+    public function hookHeader($param)
+    {
+        $this->context->controller->registerStylesheet('modules-aeuc_front', 'modules/'.$this->name.'/views/css/aeuc_front.css', ['media' => 'all', 'priority' => 150]);
+
+        if (isset($this->context->controller->php_self) && ($this->context->controller->php_self == 'cms')) {
+            if ($this->isPrintableCMSPage()) {
+                $this->context->controller->registerStylesheet('modules-aeuc_print', 'modules/'.$this->name.'/views/css/aeuc_print.css', ['media' => 'print', 'priority' => 150]);
+            }
+        }
+        if (Tools::getValue('direct_print') == '1') {
+            $this->context->controller->registerJavascript('modules-fo_aeuc_print', 'modules/'.$this->name.'/views/js/fo_aeuc_print.js', ['position' => 'bottom', 'priority' => 150]);
+        }
+    }
+
+    protected function addMailTemplateVariables(array &$templateVars, string $template, int $langId, int $carrierId): void
+    {
+        $mailInfo = $this->getMailInfo($template);
 
         if ($mailInfo['mail_id']) {
             $cmsRoleIds = AeucCMSRoleEmailEntity::getCMSRoleIdsFromIdMail(
@@ -762,30 +806,16 @@ class Ps_LegalCompliance extends Module
 
             $cmsContents = $this->display(__FILE__, 'hook-email-wrapper.tpl');
 
-            $param['template_vars']['{ps_legalcompliance_content_html}'] = $cmsContents;
-            $param['template_vars']['{ps_legalcompliance_content_txt}'] = $cmsContentsTxt;
+            $templateVars['{ps_legalcompliance_content_html}'] = $cmsContents;
+            $templateVars['{ps_legalcompliance_content_txt}'] = $cmsContentsTxt;
         }
 
         if (
             'order_conf' === $mailInfo['tpl_name']
-            && isset($param['template_vars']['{carrier}'])
+            && isset($templateVars['{carrier}'])
         ) {
-            $carrier = new Carrier((int) $param['cart']->id_carrier, $langId);
-            $param['template_vars']['{carrier}'] .= ' - '.$carrier->delay;
-        }
-    }
-
-    public function hookHeader($param)
-    {
-        $this->context->controller->registerStylesheet('modules-aeuc_front', 'modules/'.$this->name.'/views/css/aeuc_front.css', ['media' => 'all', 'priority' => 150]);
-
-        if (isset($this->context->controller->php_self) && ($this->context->controller->php_self == 'cms')) {
-            if ($this->isPrintableCMSPage()) {
-                $this->context->controller->registerStylesheet('modules-aeuc_print', 'modules/'.$this->name.'/views/css/aeuc_print.css', ['media' => 'print', 'priority' => 150]);
-            }
-        }
-        if (Tools::getValue('direct_print') == '1') {
-            $this->context->controller->registerJavascript('modules-fo_aeuc_print', 'modules/'.$this->name.'/views/js/fo_aeuc_print.js', ['position' => 'bottom', 'priority' => 150]);
+            $carrier = new Carrier($carrierId, $langId);
+            $templateVars['{carrier}'] .= ' - '.$carrier->delay;
         }
     }
 
